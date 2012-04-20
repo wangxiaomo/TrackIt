@@ -7,11 +7,15 @@ use vars qw/$AUTOLOAD/;
 use Smart::Comments;
 use Carp qw/carp croak/;
 
+BEGIN { unshift @INC, '..' }
+
+use URL::Request;
+
 sub new {
     my $class = shift;
     my $param = shift || {};
     my $self  = {
-        map { uc($_) => $param->{$_} } keys %$param
+        REQUEST     =>  URL::Request->new($param);
     };
     bless $self, $class;
 }
@@ -19,24 +23,19 @@ sub new {
 sub AUTOLOAD {
     my $self  = shift;
     $AUTOLOAD =~ s/.*:://;
-    $self->{uc($AUTOLOAD)} = shift if scalar @_;
-    return $self->{uc($AUTOLOAD)};
+    $self->{REQUEST}->{uc($AUTOLOAD)} = shift if scalar @_;
+    return $self->{REQUEST}->{uc($AUTOLOAD)};
 }
 
 sub fetch {
     my $self  = shift;
     croak "haven't set the url to fetch!"
         if not defined $self->{URL};
-    print $self->{METHOD};
-    print $self->{URL};
+    print $self->{REQUEST}->{METHOD};
+    print $self->{REQUEST}->{URL};
    
     use LWP::UserAgent;
-    use HTTP::Request;
-    my $ua    = LWP::UserAgent->new;
-    my $req   = HTTP::Request->new(
-            $self->{METHOD},
-            $self->{URL},
-    );
+    my $req   = $self->{REQUEST}->get_req();
     my $res   = $ua->request($req);
     if ($res->is_success) {
         use Data::Dumper;
