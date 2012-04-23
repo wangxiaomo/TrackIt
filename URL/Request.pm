@@ -49,7 +49,7 @@ package main;
 
 use LWP::UserAgent;
 my $request = URL::Request->new;
-$request->url('htt://www.baxidu.com');
+$request->url('http://www.baxidu.com');
 $request->method('get');
 my $req = $request->get_req();
 my $ua  = LWP::UserAgent->new;
